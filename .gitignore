@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### 설정 파일 ###
+**/application-core.yml
+**/application-api.yml
+**/application-consumer.yml
+**/docker-compose.yml
+
