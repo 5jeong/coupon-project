@@ -1,5 +1,7 @@
 package com.example.couponcore.model;
 
+import com.example.couponcore.exception.CouponIssueException;
+import com.example.couponcore.exception.ErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Builder
 @Table(name = "coupons")
 public class Coupon extends BaseTimeEntity {
     @Id
@@ -47,4 +51,29 @@ public class Coupon extends BaseTimeEntity {
     @Column(nullable = false)
     private LocalDateTime dateIssueEnd;
 
+
+    public boolean validateIssueQuantity(){
+        // 수량이 없는 쿠폰인 경우
+        if(totalQuantity == null){
+            return true;
+        }
+        return totalQuantity > issuedQuantity;
+    }
+
+    public boolean validateIssueDate(){
+        LocalDateTime now = LocalDateTime.now();
+        return dateIssueStart.isBefore(now) && dateIssueEnd.isAfter(now);
+    }
+
+    // 쿠폰 발급
+    public void issue(){
+        if(!validateIssueQuantity()){
+            throw new CouponIssueException(ErrorCode.INVALID_COUPON_ISSUE_QUANTITY);
+        }
+        if(!validateIssueDate()){
+            throw new CouponIssueException(ErrorCode.INVALID_COUPON_ISSUE_DATE);
+        }
+
+        issuedQuantity++;
+    }
 }
