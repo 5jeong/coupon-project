@@ -1,3 +1,6 @@
+val bootJar: org.springframework.boot.gradle.tasks.bundling.BootJar by tasks
+bootJar.enabled = false
+
 plugins {
     java
     id("org.springframework.boot") version "3.4.1"
@@ -12,6 +15,13 @@ java {
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
+
+configurations {
+    compileOnly {
+        extendsFrom(configurations.annotationProcessor.get())
+    }
+}
+
 repositories {
     mavenCentral()
 }
@@ -32,7 +42,12 @@ subprojects {
         annotationProcessor("org.projectlombok:lombok")
         runtimeOnly("com.h2database:h2")
         runtimeOnly("com.mysql:mysql-connector-j")
+        implementation ("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0")
         implementation("org.springframework.boot:spring-boot-starter")
+        implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+        annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
+        annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+        annotationProcessor("jakarta.persistence:jakarta.persistence-api")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
     }
 }
