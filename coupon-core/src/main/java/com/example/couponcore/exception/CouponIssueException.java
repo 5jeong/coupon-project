@@ -9,4 +9,8 @@ public class CouponIssueException extends RuntimeException {
 
     private final ErrorCode errorCode;
 
+    @Override
+    public String getMessage() {
+        return "[%s] %s".formatted(errorCode, errorCode.message);
+    }
 }
