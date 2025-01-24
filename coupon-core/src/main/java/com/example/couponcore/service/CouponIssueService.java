@@ -24,13 +24,19 @@ public class CouponIssueService {
 
     @Transactional
     public void issue(long couponId, long userId) {
-        Coupon coupon = findCoupon(couponId);
+        Coupon coupon = findCouponWithLock(couponId);
         coupon.issue();
         saveCouponIssue(couponId, userId);
     }
 
     public Coupon findCoupon(long couponId) {
         return couponRepository.findById(couponId)
+                .orElseThrow(() -> new CouponIssueException(COUPON_NOT_EXIST));
+    }
+
+    @Transactional
+    public Coupon findCouponWithLock(long couponId) {
+        return couponRepository.findCouponWithLock(couponId)
                 .orElseThrow(() -> new CouponIssueException(COUPON_NOT_EXIST));
     }
 
