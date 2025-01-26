@@ -7,9 +7,9 @@ import static com.example.couponcore.util.CouponRedisUtils.getRedisLockName;
 import com.example.couponcore.component.DistributeLockExecutor;
 import com.example.couponcore.exception.CouponIssueException;
 import com.example.couponcore.exception.ErrorCode;
-import com.example.couponcore.model.Coupon;
 import com.example.couponcore.repository.redis.RedisRepository;
 import com.example.couponcore.repository.redis.dto.CouponIssueRequest;
+import com.example.couponcore.repository.redis.dto.CouponRedisEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -21,33 +21,21 @@ public class AsyncCouponIssueServiceV1 {
 
     private final RedisRepository redisRepository;
     private final CouponIssueRedisService couponIssueRedisService;
-    private final CouponIssueService couponIssueService;
     private final DistributeLockExecutor distributeLockExecutor;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final CouponCacheService couponCacheService;
 
     public void issue(long couponId, long userId) {
 
         // 쿠폰 존재 검증
-        Coupon coupon = couponIssueService.findCoupon(couponId);
+        CouponRedisEntity coupon = couponCacheService.getCouponCache(couponId);
+        coupon.checkIssueableCoupon();
 
-        // 발급 가능한 날짜 검증
-        if (!coupon.validateIssueDate()) {
-            throw new CouponIssueException(ErrorCode.INVALID_COUPON_ISSUE_DATE);
-        }
-
-        // Redis Lock 적용
+        // Redis 분산Lock 적용
         distributeLockExecutor.execute(getRedisLockName(couponId), 3000, 3000, () -> {
-            // 수량 조회 및 발급 가능 여부 검증
-            if (!couponIssueRedisService.availableTotalIssueQuantity(coupon.getTotalQuantity(), couponId)) {
-                throw new CouponIssueException(ErrorCode.INVALID_COUPON_ISSUE_QUANTITY);
-            }
-            // 중복 발급 요청 검증
-            if (!couponIssueRedisService.availableUserIssueQuantity(couponId, userId)) {
-                throw new CouponIssueException(ErrorCode.DUPLICATED_COUPON_ISSUE);
-            }
+            couponIssueRedisService.checkCouponIssueQuantity(coupon, userId);
             issueRequest(couponId, userId);
         });
-
     }
 
     private void issueRequest(long couponId, long userId) {

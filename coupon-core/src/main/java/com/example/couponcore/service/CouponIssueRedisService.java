@@ -2,7 +2,10 @@ package com.example.couponcore.service;
 
 import static com.example.couponcore.util.CouponRedisUtils.getIssueRequestKey;
 
+import com.example.couponcore.exception.CouponIssueException;
+import com.example.couponcore.exception.ErrorCode;
 import com.example.couponcore.repository.redis.RedisRepository;
+import com.example.couponcore.repository.redis.dto.CouponRedisEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +14,16 @@ import org.springframework.stereotype.Service;
 public class CouponIssueRedisService {
     private final RedisRepository redisRepository;
 
+    public void checkCouponIssueQuantity(CouponRedisEntity coupon, long userId) {
+        // 수량 조회 및 발급 가능 여부 검증
+        if (!availableTotalIssueQuantity(coupon.totalQuantity(), coupon.id())) {
+            throw new CouponIssueException(ErrorCode.INVALID_COUPON_ISSUE_QUANTITY);
+        }
+        // 중복 발급 요청 검증
+        if (!availableUserIssueQuantity(coupon.id(), userId)) {
+            throw new CouponIssueException(ErrorCode.DUPLICATED_COUPON_ISSUE);
+        }
+    }
 
     // 수량 조회 및 발급가능 여부 검증
     public boolean availableTotalIssueQuantity(Integer totalQuantity, long couponId) {
