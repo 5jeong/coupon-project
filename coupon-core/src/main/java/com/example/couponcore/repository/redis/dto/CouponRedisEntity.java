@@ -39,7 +39,7 @@ public record CouponRedisEntity(
         return dateIssueStart.isBefore(now) && dateIssueEnd().isAfter(now);
     }
 
-    public void checkIssueableCoupon() {
+    public void checkIssuableCoupon() {
         if (!availableIssueDate()) {
             throw new CouponIssueException(INVALID_COUPON_ISSUE_DATE);
         }
