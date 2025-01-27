@@ -29,7 +29,7 @@ public class AsyncCouponIssueServiceV1 {
 
         // 쿠폰 존재 검증
         CouponRedisEntity coupon = couponCacheService.getCouponCache(couponId);
-        coupon.checkIssueableCoupon();
+        coupon.checkIssuableCoupon();
 
         // Redis 분산Lock 적용
         distributeLockExecutor.execute(getRedisLockName(couponId), 3000, 3000, () -> {
