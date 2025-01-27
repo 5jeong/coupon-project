@@ -46,6 +46,8 @@ subprojects {
         implementation ("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0")
         implementation("org.springframework.boot:spring-boot-starter")
         implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+        implementation("org.springframework.boot:spring-boot-starter-actuator")
+        implementation("io.micrometer:micrometer-registry-prometheus")
         annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
         annotationProcessor("jakarta.annotation:jakarta.annotation-api")
         annotationProcessor("jakarta.persistence:jakarta.persistence-api")
