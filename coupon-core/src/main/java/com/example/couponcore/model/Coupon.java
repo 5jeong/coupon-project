@@ -51,29 +51,37 @@ public class Coupon extends BaseTimeEntity {
     @Column(nullable = false)
     private LocalDateTime dateIssueEnd;
 
-
-    public boolean validateIssueQuantity(){
+    //todo 메소드명 변경예정
+    public boolean validateIssueQuantity() {
         // 수량이 없는 쿠폰인 경우
-        if(totalQuantity == null){
+        if (totalQuantity == null) {
             return true;
         }
         return totalQuantity > issuedQuantity;
     }
 
-    public boolean validateIssueDate(){
+    //todo 메소드명 변경예정
+    public boolean validateIssueDate() {
         LocalDateTime now = LocalDateTime.now();
         return dateIssueStart.isBefore(now) && dateIssueEnd.isAfter(now);
     }
 
+    public boolean isIssueComplete() {
+        LocalDateTime now  = LocalDateTime.now();
+        return dateIssueEnd.isBefore(now) || !validateIssueQuantity();
+    }
+
     // 쿠폰 발급
-    public void issue(){
-        if(!validateIssueQuantity()){
+    public void issue() {
+        if (!validateIssueQuantity()) {
             throw new CouponIssueException(ErrorCode.INVALID_COUPON_ISSUE_QUANTITY);
         }
-        if(!validateIssueDate()){
+        if (!validateIssueDate()) {
             throw new CouponIssueException(ErrorCode.INVALID_COUPON_ISSUE_DATE);
         }
 
         issuedQuantity++;
     }
+
+
 }

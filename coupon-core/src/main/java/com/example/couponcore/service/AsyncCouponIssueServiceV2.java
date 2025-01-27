@@ -13,9 +13,8 @@ public class AsyncCouponIssueServiceV2 {
     private final CouponCacheService couponCacheService;
 
     public void issue(long couponId, long userId) {
-
         // 쿠폰 존재 검증
-        CouponRedisEntity coupon = couponCacheService.getCouponCache(couponId);
+        CouponRedisEntity coupon = couponCacheService.getCouponLocalCache(couponId);
         coupon.checkIssuableCoupon();
         issueRequest(couponId, userId, coupon.totalQuantity());
     }
